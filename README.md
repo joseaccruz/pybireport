@@ -1,3 +1,8 @@
+# WARNING
+
+__This is unfinished work.__
+__Please, don't rely on it yet for any practical application__
+
 # PyBIReport
 
 `pybireport` is a tool to esily generate BI reports from `pandas` (for now) data.
