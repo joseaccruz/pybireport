@@ -1,7 +1,25 @@
+import os
 import setuptools
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+
+local_path = os.path.abspath(os.path.dirname(__file__))
+
+
+def read_reqs(fname):
+    req_file = os.path.join(os.path.abspath(local_path), fname)
+
+    with open(req_file) as f:
+        reqs = [req.strip() for req in f.read().strip().splitlines()]
+
+    return reqs
+
+
+def read_description(fname):
+    desc_file = os.path.join(os.path.abspath(local_path), fname)
+
+    with open(desc_file, "r") as f:
+        desc = f.read()
+
 
 setuptools.setup(
     name="pybireport", # Replace with your own username
@@ -9,7 +27,7 @@ setuptools.setup(
     author="joseaccruz",
     #author_email="author@example.com",
     description="A simple BI report generator.",
-    long_description=long_description,
+    long_description=read_description("README.md"),
     long_description_content_type="text/markdown",
     url="https://github.com/joseaccruz/pybireport",
     license='MIT',

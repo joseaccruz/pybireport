@@ -1,7 +1,6 @@
 import xlsxwriter
 
-import copy
-
+from pybireport.styles import DefaultStyle
 
 
 
@@ -54,9 +53,14 @@ class Viz:
     PLACE_RIGHT = 5
 
     def __init__(self):
+        # default format for the Viz
+        self._style = DefaultStyle()
+
+        # how to place the Viz
         self._placement = Viz.PLACE_ABSOLUTE
         self._pcol, self._prow = (1, 1)
 
+        # reference Viz
         self._ref = None
         self._spacer_rows = 0
         self._spacer_cols = 0
@@ -84,16 +88,8 @@ class Viz:
         self._spacer_cols = cols
         return self
 
-    def merge_cols(self, cols=1):
-        self._merge_cols = cols
-        return self
-
-    def merge_rows(self, rows=1):
-        self._merge_rows = rows
-        return self
-
-    def format(self, style):
-        self._style = new_style(self._style, style)
+    def style(self, style):
+        self._style = style
 
     def _generate(self, wb, ws):
         print("Abstract class error")
@@ -129,87 +125,136 @@ class Viz:
         return self._tl_col, self._tl_row, self._br_col, self._br_row
 
 
-class Title(Viz):
+class VizMerge(Viz):
+    def __init__(self):
+        super().__init__()
+
+        # merge info
+        self._merge_rows = 1
+        self._merge_cols = 1
+
+    def merge_cols(self, cols=1):
+        self._merge_cols = cols
+        return self
+
+    def merge_rows(self, rows=1):
+        self._merge_rows = rows
+        return self
+
+
+class Text(VizMerge):
     def __init__(self, text):
         super().__init__()
 
         self._text = text
-        self._style = style_title
+
+    def _format(self, wb):
+        # setup all formats
+        self._fmt_text = wb.add_format(self._style.text)
 
     def _generate(self, wb, ws):
-        # Format the title cells
-        fmt = wb.add_format(self._style)
+        # prepare the format
+        self._format(wb)
 
-        # write the title
-        ws.write_string(self._prow, self._pcol, self._text, fmt)
-
-        if self._merge_cols > 0 or self._merge_rows > 0:
-            ws.merge_range(self._prow, self._pcol, self._prow + self._merge_rows, self._pcol + self._merge_cols)
+        # write the text
+        if self._merge_cols > 1 or self._merge_rows > 1:
+            ws.merge_range(self._prow, self._pcol, self._prow + self._merge_rows - 1, self._pcol + self._merge_cols - 1, self._text, self._fmt_text)
+        else:
+            ws.write_string(self._prow, self._pcol, self._text, self._fmt_text)
 
         # compute the occupied area
         self._tl_col, self._tl_row = self._pcol, self._prow
         self._br_col, self._br_row = self._pcol + self._merge_cols, self._prow + self._merge_rows
 
 
+class Title(Text):
+    def _format(self, wb):
+        # setup all formats
+        self._fmt_text = wb.add_format(self._style.title)
+
+
+class Legend(Text):
+    def _format(self, wb):
+        # setup all formats
+        self._fmt_text = wb.add_format(self._style.legend)
+
+
 class Table(Viz):
-    def __init__(self, title, data, col_types={}, legend=""):
+    def __init__(self, title, data):
         super().__init__()
 
         self._title = title
         self._data = data
-        self._legend = legend
 
-        # create the default col_types 'str'
-        self._col_types = dict(zip(data.columns.values, [str] * len(data.columns)))
+        # default parameters
+        self._merge_title = True
+        self._zebra = False
 
-        # [TBD] merge the default _col_types w/ the coltypes passed by param
-        for k, v in col_types.items():
-            self._col_types[k] = v
+        # [TBD] allow a specific format for each column (inherit from row, row_odd, row_even)
 
+
+    def _format(self, wb):
+        # setup all formats
+        self._fmt_title = wb.add_format(self._style.table_title)
+        self._fmt_header = wb.add_format(self._style.table_header)
+        self._fmt_row = wb.add_format(self._style.table_row)
+        self._fmt_row_odd = wb.add_format(self._style.table_row_odd)
+        self._fmt_row_even = wb.add_format(self._style.table_row_even)
 
     def _generate(self, wb, ws):
+        self._format(wb)
+
+        # start cell
         (r, c) = self._prow, self._pcol
 
         # write the title
-        ws.write_string(r, c, self._title)
+        if self._merge_title:
+            ws.merge_range(r, c, r, c + len(self._data.columns) - 1, self._title, self._fmt_title)
+        else:
+            ws.write_string(r, c, self._title, self._fmt_title)
 
-        # [TBD] this space can be configured in the future
-        r += 1       
+        # [TBD] this spacer should be configured in the future
+        r += 2
 
         # write the header
         for (i, col) in enumerate(self._data.columns):
-            ws.write_string(r, c + i, col)
+            # [TBD] allow a specific format for each header column
+            ws.write_string(r, c + i, col, self._fmt_header)
 
         r += 1
 
         # write the data
         for (i, values) in enumerate(self._data.values):
+            if self._zebra:
+                if i % 2 == 0:
+                    fmt_cell = self._fmt_row_odd
+                else:
+                    fmt_cell = self._fmt_row_even
+            else:
+                fmt_cell = self._fmt_row
+
             for (j, value) in enumerate(values):
                 # Convert the date string into a datetime object.
                 # date = datetime.strptime(date_str, "%Y-%m-%d")
 
                 # [TBD] use a class parameter "col_type"
-                ws.write_string(r + i, c + j, str(value))
+                ws.write_string(r + i, c + j, str(value), fmt_cell)
 
                 #worksheet.write_datetime(row, col + 1, date, date_format )
                 #worksheet.write_number  (row, col + 2, cost, money_format)
                 #row += 1
 
-        # [TBD] this space can be configured in the future
-        r += len(self._data) + 2
-
-        # write the table legend
-        ws.write_string(r, c, self._legend)
-
-
-
         # compute the occupied area
         self._tl_col, self._tl_row = self._pcol, self._prow
-        self._br_col, self._br_row = self._pcol + len(self._data.columns), self._prow + len(self._data) + 2
+        self._br_col, self._br_row = self._pcol + len(self._data.columns), self._prow + len(self._data) + 3
+
+    def zebra(self, on):
+        self._zebra = on
 
 
-class VTable(Viz):
-    def __init__(self, title, data, legend=""):
+
+class Form(Viz):
+    def __init__(self, title, data):
         super().__init__()
 
         self._title = title
@@ -220,63 +265,10 @@ class VTable(Viz):
         print("\t'%s'" % self._title)
         for (k, v) in self._data.items():
             print("\t%s: %s" % (k, str(v)))
-        print("\t'%s'" % self._legend)
 
         # compute the occupied area
         self._tl_col, self._tl_row = self._pcol, self._prow
         self._br_col, self._br_row = self._pcol + 2, self._prow + len(self._data.keys()) + 2
 
 
-
-#
-# Styles
-#
-def new_style(default, props):
-    style = copy.copy(default)
-
-    for k, v in props.items():
-        style[k] = v
-
-    return style
-
-
-style_default = {
-    "font_name": "Arial",
-    "font_size": 11,
-    "font_color": "#000000",
-    "bold": False,
-    "italic": False,
-    "underline": False,
-    "font_strikeout": False,
-
-    "align": "left",                 # "center", "right", "fill", "justify", "center_across", "distributed"
-    "valign": "vcenter",             # "top", "bottom", "vjustify", "vdistributed"
-    "rotation": 0,
-    "text_wrap": False,
-    "shrink": False,
-
-    "pattern": 1,
-    "bg_color": "#FFFFFF",
-
-    "border": 0,
-    "bottom": 0,
-    "top": 0,
-    "left": 0,
-    "right": 0,
-    "border_color": "#000000",
-    "bottom_color": "#000000",
-    "top_color": "#000000",
-    "left_color": "#000000",
-    "right_color": "#000000",
-    "num_format": "General"
-}
-
-
-style_title = new_style(style_default, {
-    "font_size": 18,
-    "font_color": "#FFFFFF",
-    "bold": True,
-    "align": "center",
-    "bg_color": "003300"
-})
 

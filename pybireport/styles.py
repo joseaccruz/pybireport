@@ -1,55 +1,103 @@
-import copy
-
 #
 # Styles
 #
-def new_style(default, props):
-    style = copy.copy(default)
+class Style:
+    def __init__(self):
+        self.base = {}
 
-    for k, v in props.items():
-        style[k] = v
+#
+# An opinionated DefaultStyle
+#
+class DefaultStyle(Style):
+    def __init__(self):
+        super().__init__()
 
-    return style
+        self.base = {**self.base, **{
+            "font_name": "Arial",
+            "font_size": 11,
+            "font_color": "#000000",
+            "bold": False,
+            "italic": False,
+            "underline": False,
+            "font_strikeout": False,
 
+            "align": "left",                 # "center", "right", "fill", "justify", "center_across", "distributed"
+            "valign": "vcenter",             # "top", "bottom", "vjustify", "vdistributed"
+            "rotation": 0,
+            "text_wrap": False,
+            "shrink": False,
 
-style_default = {
-	"font_name": "Arial",
-	"font_size": 11,
-	"font_color": "#000000",
-	"bold": False,
-	"italic": False,
-	"underline": False,
-	"font_strikeout": False,
+            "pattern": 1,
+            "bg_color": "#FFFFFF",
 
-	"align": "left",                 # "center", "right", "fill", "justify", "center_across", "distributed"
-	"valign": "vcenter",             # "top", "bottom", "vjustify", "vdistributed"
-	"rotation": 0,
-	"text_wrap": False,
-	"shrink": False,
+            "border": 1,
+            # "bottom": 1,
+            # "top": 1,
+            # "left": 1,
+            # "right": 1,
+            "border_color": "#cccccc",
+            #"bottom_color": "#000000",
+            #"top_color": "#000000",
+            #"left_color": "#000000",
+            #"right_color": "#000000"
 
-	"pattern": 1,
-	"bg_color": "#FFFFFF",
+            "num_format": "General"
+        }}
 
-	"border": 0,
-	"bottom": 0,
-	"top": 0,
-	"left": 0,
-	"right": 0,
-	"border_color": "#000000",
-	"bottom_color": "#000000",
-	"top_color": "#000000",
-	"left_color": "#000000",
-	"right_color": "#000000",
-	"num_format": "General"
-}
+        self.text = {**self.base, **{
+            "font_size": 11
+        }}
 
+        self.title = {**self.text, **{
+            "font_size": 18,
+            "font_color": "#FFFFFF",
+            "bold": True,
+            "align": "center",
+            "bg_color": "#003300"
+        }}
 
-style_title = new_style(style_default, {
-	"font_size": 18,
-	"font_color": "#FFFFFF",
-	"bold": True,
-	"align": "center",
-	"bg_color": "003300"
-})
+        self.legend = {**self.text, **{
+            "font_size": 9
+        }}
+
+        self.table_title = {**self.base, **{
+            "font_size": 16,
+            "bold": True,
+            "align": "center"
+        }}
+
+        self.table_data = {**self.base, **{
+            "border_color": "#000000",
+        }}
+
+        self.table_header = {**self.table_data, **{
+            "font_size": 12,
+            "bold": True,
+            "align": "center",
+            "bg_color": "#808080"
+        }}
+
+        self.table_row = {**self.table_data, **{
+            "font_size": 11,
+            "align": "center"
+        }}
+
+        self.table_row_odd = {**self.table_row, **{}}
+
+        self.table_row_even = {**self.table_row, **{
+            "bg_color": "#F0F0F0"
+        }}
+
+#
+# Alternate style just to show how
+#
+class AlternateStyle(Style):
+    def __init__(self):
+        super().__init__()
+
+        self._title = {**self._title, **{
+            "font_size": 16
+        }}
+
 
 
