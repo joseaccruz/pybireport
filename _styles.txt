@@ -1,0 +1,44 @@
+Font
+	Font type	'font_name'	set_font_name()
+ 	Font size	'font_size'	set_font_size()
+ 	Font color	'font_color'	set_font_color()
+ 	Bold	'bold'	set_bold()
+ 	Italic	'italic'	set_italic()
+ 	Underline	'underline'	set_underline()
+ 	Strikeout	'font_strikeout'	set_font_strikeout()
+ 	Super/Subscript	'font_script'	set_font_script()
+
+Number
+	Numeric format	'num_format'	set_num_format()
+
+Protection
+	Lock cells	'locked'	set_locked()
+ 	Hide formulas	'hidden'	set_hidden()
+
+Alignment
+	Horizontal align	'align'	set_align()
+ 	Vertical align	'valign'	set_align()
+ 	Rotation	'rotation'	set_rotation()
+ 	Text wrap	'text_wrap'	set_text_wrap()
+ 	Reading order	'reading_order'	set_reading_order()
+ 	Justify last	'text_justlast'	set_text_justlast()
+ 	Center across	'center_across'	set_center_across()
+ 	Indentation	'indent'	set_indent()
+ 	Shrink to fit	'shrink'	set_shrink()
+
+Pattern
+	Cell pattern	'pattern'	set_pattern()
+ 	Background color	'bg_color'	set_bg_color()
+ 	Foreground color	'fg_color'	set_fg_color()
+
+Border
+	Cell border	'border'	set_border()
+ 	Bottom border	'bottom'	set_bottom()
+ 	Top border	'top'	set_top()
+ 	Left border	'left'	set_left()
+ 	Right border	'right'	set_right()
+ 	Border color	'border_color'	set_border_color()
+ 	Bottom color	'bottom_color'	set_bottom_color()
+ 	Top color	'top_color'	set_top_color()
+ 	Left color	'left_color'	set_left_color()
+ 	Right color	'right_color'	set_right_color()

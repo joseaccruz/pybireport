@@ -1,3 +1,5 @@
+# [TBD] Allow the redefinition of a style in a Report / Page level as well as Viz level.
+
 import xlsxwriter
 
 from pybireport.styles import DefaultStyle
@@ -89,9 +91,21 @@ class Viz:
         return self
 
     def style(self, style):
+        """
+        Define a new style for the Viz.
+        """
         self._style = style
+        return self
+
+    def format(self, props, component):
+        # [TBD] raise an informative error if component does not exist. Suggests the components of style
+        # [TBD] raise an informative error if prop does not exist. Suggests the components of style
+        old = self._style.__dict__[component]
+        self._style.__dict__[component] = {**old, **props}
+        return self
 
     def _generate(self, wb, ws):
+        # [TBD] Raise an error here
         print("Abstract class error")
         quit()
 
@@ -148,13 +162,17 @@ class Text(VizMerge):
 
         self._text = text
 
-    def _format(self, wb):
+    def format(self, props, component="text"):
+        super().format(props, component)
+        return self
+
+    def _format_from_style(self, wb):
         # setup all formats
         self._fmt_text = wb.add_format(self._style.text)
 
     def _generate(self, wb, ws):
         # prepare the format
-        self._format(wb)
+        self._format_from_style(wb)
 
         # write the text
         if self._merge_cols > 1 or self._merge_rows > 1:
@@ -168,15 +186,26 @@ class Text(VizMerge):
 
 
 class Title(Text):
-    def _format(self, wb):
+
+    def format(self, props, component="title"):
+        super().format(props, component)
+        return self
+
+    def _format_from_style(self, wb):
         # setup all formats
         self._fmt_text = wb.add_format(self._style.title)
 
 
 class Legend(Text):
-    def _format(self, wb):
+
+    def format(self, props, component="legend"):
+        super().format(props, component)
+        return self
+
+    def _format_from_style(self, wb):
         # setup all formats
         self._fmt_text = wb.add_format(self._style.legend)
+        print(self._style.legend)
 
 
 class Table(Viz):
@@ -193,7 +222,7 @@ class Table(Viz):
         # [TBD] allow a specific format for each column (inherit from row, row_odd, row_even)
 
 
-    def _format(self, wb):
+    def _format_from_style(self, wb):
         # setup all formats
         self._fmt_title = wb.add_format(self._style.table_title)
         self._fmt_header = wb.add_format(self._style.table_header)
@@ -202,7 +231,7 @@ class Table(Viz):
         self._fmt_row_even = wb.add_format(self._style.table_row_even)
 
     def _generate(self, wb, ws):
-        self._format(wb)
+        self._format_from_style(wb)
 
         # start cell
         (r, c) = self._prow, self._pcol

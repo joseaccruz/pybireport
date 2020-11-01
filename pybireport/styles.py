@@ -89,7 +89,7 @@ class DefaultStyle(Style):
         }}
 
 #
-# Alternate style just to show how
+# Alternate style just to show how to do it
 #
 class AlternateStyle(Style):
     def __init__(self):

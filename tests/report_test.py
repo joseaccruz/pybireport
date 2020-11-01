@@ -1,3 +1,4 @@
+# [TBD] improve the test to get 100% coverage of the report.
 import pandas as pd
 
 from pybireport.report import Report, Page, Title, Table, Legend
@@ -15,7 +16,7 @@ rep = Report("output/test_report.xlsx")
 p1 = rep.add_page(Page("sheet_1"))
 
 vtitle = p1.add(Title("This is my first report")) \
-	.place_at(1, 1) \
+	.place_at(0, 0) \
 	.merge_cols(4)
 
 vtable = p1.add(Table("Contagens*", data)) \
@@ -23,8 +24,10 @@ vtable = p1.add(Table("Contagens*", data)) \
 
 vlegend = p1.add(Legend("*Small legend at the bottom")) \
 	.place_bellow(vtable) \
-	.merge_cols(len(data.columns))
+	.merge_cols(len(data.columns)) \
+	.format({'italic': True})
 
+	
 p2 = rep.add_page(Page("sheet_2"))
 
 p2.add(vtable)
