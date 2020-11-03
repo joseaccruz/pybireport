@@ -1,18 +1,38 @@
+
+class Style:
+    def __init__(self, name, prop={}):
+        self.name = name
+        self.prop = prop
+
+    def format(self, value):
+        if type(value) is str:
+            self.name = value
+        elif type(value) is dict:
+            self.prop = value
+
 #
 # Styles
 #
-class Style:
+class StyleSheet:
     def __init__(self):
-        self.base = {}
+        self._styles = {}
+
+    def inherit(self, parent, child):
+        return {**self._styles.get(parent, {}), **child}
+
+    def get(self, style):
+        return {**self._styles.get(style.name, {}), **style.prop}
 
 #
 # An opinionated DefaultStyle
 #
-class DefaultStyle(Style):
+class DefaultStyleSheet(StyleSheet):
     def __init__(self):
         super().__init__()
 
-        self.base = {**self.base, **{
+        self._styles = {}
+
+        self._styles["base"] = {
             "font_name": "Arial",
             "font_size": 11,
             "font_color": "#000000",
@@ -42,62 +62,62 @@ class DefaultStyle(Style):
             #"right_color": "#000000"
 
             "num_format": "General"
-        }}
+        }
 
-        self.text = {**self.base, **{
+        self._styles["text"] = self.inherit("base", {
             "font_size": 11
-        }}
+        })
 
-        self.title = {**self.text, **{
+        self._styles["title"] = self.inherit("text", {
             "font_size": 18,
             "font_color": "#FFFFFF",
             "bold": True,
             "align": "center",
             "bg_color": "#003300"
-        }}
+        })
 
-        self.legend = {**self.text, **{
+        self._styles["legend"] = self.inherit("text", {
             "font_size": 9
-        }}
+        })
 
-        self.table_title = {**self.base, **{
+        self._styles["table_title"] = self.inherit("text", {
             "font_size": 16,
             "bold": True,
             "align": "center"
-        }}
+        })
 
-        self.table_data = {**self.base, **{
+        self._styles["table_cell"] = self.inherit("base", {
             "border_color": "#000000",
-        }}
+        })
 
-        self.table_header = {**self.table_data, **{
+        self._styles["table_header"] = self.inherit("table_cell", {
             "font_size": 12,
             "bold": True,
             "align": "center",
             "bg_color": "#808080"
-        }}
+        })
 
-        self.table_row = {**self.table_data, **{
+        self._styles["table_row"] = self.inherit("table_cell", {
             "font_size": 11,
             "align": "center"
-        }}
+        })
 
-        self.table_row_odd = {**self.table_row, **{}}
+        self._styles["table_row_odd"] = self.inherit("table_row", {})
 
-        self.table_row_even = {**self.table_row, **{
+        self._styles["table_row_even"] = self.inherit("table_row", {
             "bg_color": "#F0F0F0"
-        }}
+        })
 
 #
 # Alternate style just to show how to do it
 #
-class AlternateStyle(Style):
+class AlternateStyleSheet(DefaultStyleSheet):
     def __init__(self):
         super().__init__()
 
-        self._title = {**self._title, **{
+        self._styles["title"] = self.inherit("title", {
             "font_size": 16
-        }}
+        })
 
 
 

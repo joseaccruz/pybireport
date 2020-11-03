@@ -1,8 +1,8 @@
 # [TBD] improve the test to get 100% coverage of the report.
 import pandas as pd
 
-from pybireport.report import Report, Page, Title, Table, Legend
-from pybireport.styles import DefaultStyle
+from pybireport.report import Report, Page, Text, Table
+#from pybireport.styles import DefaultStyleSheet
 
 
 data = pd.DataFrame({
@@ -13,22 +13,22 @@ data = pd.DataFrame({
 
 rep = Report("output/test_report.xlsx")
 
-p1 = rep.add_page(Page("sheet_1"))
+p1 = rep.add(Page("sheet_1"))
 
-vtitle = p1.add(Title("This is my first report")) \
+vtitle = p1.add(Text("This is my first report")) \
+	.format("title") \
 	.place_at(0, 0) \
 	.merge_cols(4)
 
-vtable = p1.add(Table("Contagens*", data)) \
-	.place_bellow(vtitle, rows=2)
+vtable = p1.add(Table(data)) \
+	.place_bellow(vtitle, rows=2) \
+	.title("Contagens*") \
+	.legend("*Small legend at the bottom", {'italic': True, 'bold': True}) \
+	.format("row_even", {'bold': True, 'bg_color': '#f0f0f0'}) \
+	.zebra(True)
 
-vlegend = p1.add(Legend("*Small legend at the bottom")) \
-	.place_bellow(vtable) \
-	.merge_cols(len(data.columns)) \
-	.format({'italic': True})
 
-	
-p2 = rep.add_page(Page("sheet_2"))
+p2 = rep.add(Page("sheet_2"))
 
 p2.add(vtable)
 
